@@ -132,14 +132,17 @@ gz_add_component(magnetometer SOURCES ${magnetometer_sources} GET_TARGET_NAME ma
 set(imu_sources ImuSensor.cc)
 gz_add_component(imu SOURCES ${imu_sources} GET_TARGET_NAME imu_target)
 
+set(uwb_sources UwbSensor.cc)
+gz_add_component(uwb SOURCES ${uwb_sources} GET_TARGET_NAME uwb_target)
+
 set(altimeter_sources AltimeterSensor.cc)
 gz_add_component(altimeter SOURCES ${altimeter_sources} GET_TARGET_NAME altimeter_target)
 
 set(air_pressure_sources AirPressureSensor.cc)
 gz_add_component(air_pressure SOURCES ${air_pressure_sources} GET_TARGET_NAME air_pressure_target)
 
-set(air_speed_sources AirSpeedSensor.cc)
-gz_add_component(air_speed SOURCES ${air_speed_sources} GET_TARGET_NAME air_speed_target)
+# set(air_speed_sources AirSpeedSensor.cc)
+# gz_add_component(air_speed SOURCES ${air_speed_sources} GET_TARGET_NAME air_speed_target)
 
 set(force_torque_sources ForceTorqueSensor.cc)
 gz_add_component(force_torque SOURCES ${force_torque_sources} GET_TARGET_NAME force_torque_target)
