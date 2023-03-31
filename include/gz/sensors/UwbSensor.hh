@@ -36,7 +36,7 @@ namespace gz
     /// Inline bracket to help doxygen filtering.
     inline namespace GZ_SENSORS_VERSION_NAMESPACE {
 
-/*     /// \brief Reference frames enum
+    /// \brief Reference frames enum
     enum class GZ_SENSORS_VISIBLE WorldFrameEnumType
     {
       /// \brief NONE : To be used only when <localization>
@@ -51,7 +51,7 @@ namespace gz
 
       /// \brief NWU (North-West-Up): x - North, y - West, z - Up.
       NWU = 3,
-    }; */
+    };
 
     ///
     /// \brief forward declarations
@@ -98,6 +98,24 @@ namespace gz
       /// \brief Get the world pose of the uwb sensor
       /// \return Pose in world frame.
       public: math::Pose3d WorldPose() const;
+
+      /// \brief Get the world orienation reference of the imu
+      /// \return Orientation reference in world frame
+      public: math::Quaterniond OrientationReference() const;
+
+      /// \brief Get the orienation of the imu with respect to reference frame
+      /// \return Orientation in reference frame. If orientation is not
+      /// enabled, this will return the last computed orientation before
+      /// orientation is disabled or identity Quaternion if orientation has
+      /// never been enabled.
+      public: math::Quaterniond Orientation() const;
+
+      /// \brief Specify the rotation offset of the coordinates of the World
+      /// frame relative to a geo-referenced frame
+      /// \param[in] _rot rotation offset
+      /// \param[in] _relativeTo world frame orientation, ENU by default
+      public: void SetWorldFrameOrientation(
+        const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo);
 
 /*       /// \brief Get the Azimuth of the controller relative to NED of controllee UWB sensor
       /// \return Azimuth in degrees

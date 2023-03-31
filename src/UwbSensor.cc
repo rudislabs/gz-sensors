@@ -55,6 +55,26 @@ class gz::sensors::UwbSensorPrivate
   /// \brief Flag for if time has been initialized
   public: bool timeInitialized = false;
 
+  /// \brief transform to Imu orientation reference frame.
+  public: math::Quaterniond orientationReference;
+
+  /// \brief transform to Imu frame from Imu reference frame.
+  public: math::Quaterniond orientation;
+
+  /// \brief World pose of the imu sensor
+  public: math::Pose3d worldPose;
+
+  /// \brief Orientation of world frame relative to a specified frame
+  public: math::Quaterniond worldRelativeOrientation;
+
+  /// \brief Frame relative-to which the worldRelativeOrientation
+  //  is defined
+  public: WorldFrameEnumType worldFrameRelativeTo = WorldFrameEnumType::NED;
+
+  /// \brief Frame relative-to which the sensor orientation is reported
+  public: WorldFrameEnumType sensorOrientationRelativeTo
+         = WorldFrameEnumType::NONE;
+
   /// \brief The azimuth of the UWB sensor in relation to the partner UWB sensor
   /// public: float azimuth;
 };
@@ -112,7 +132,7 @@ bool UwbSensor::Load(const sdf::Sensor &_sdf)
   gzdbg << "UWB data for [" << this->Name() << "] advertised on ["
          << this->Topic() << "]" << std::endl;
 
-  /* std::string localization = _sdf.UwbSensor()->Localization();
+  std::string localization = _sdf.UwbSensor()->Localization();
 
   if (localization == "ENU")
   {
@@ -123,7 +143,7 @@ bool UwbSensor::Load(const sdf::Sensor &_sdf)
     this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NWU;
   } else {
     this->dataPtr->sensorOrientationRelativeTo = WorldFrameEnumType::NONE;
-  } */
+  }
 
   this->dataPtr->initialized = true;
   return true;
@@ -161,8 +181,16 @@ bool UwbSensor::Update(const std::chrono::steady_clock::duration &_now)
   frame->add_value(this->FrameId());
 
   // Set the time stamp
-  *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
-    msgs::Convert(_now);
+/*   *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
+    msgs::Convert(_now); */
+
+    // Set the UWB orientation
+    // uwb orientation with respect to reference frame
+  this->dataPtr->orientation =
+      this->dataPtr->orientationReference.Inverse() *
+      this->dataPtr->worldPose.Rot();
+
+  msgs::Set(msg.mutable_orientation(), this->dataPtr->orientation);
 
   // Calculate azimuth angle of device in relation to partner device
   // TODO: Incorporate orientation
@@ -189,6 +217,60 @@ void UwbSensor::SetWorldPose(const math::Pose3d _pose)
 math::Pose3d UwbSensor::WorldPose() const
 {
   return this->dataPtr->worldPose;
+}
+
+
+//////////////////////////////////////////////////
+void UwbSensor::SetWorldFrameOrientation(
+  const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo)
+{
+  this->dataPtr->worldRelativeOrientation = _rot;
+  this->dataPtr->worldFrameRelativeTo = _relativeTo;
+
+  // Table to hold frame transformations
+  static const std::map<WorldFrameEnumType,
+    std::map<WorldFrameEnumType, math::Quaterniond>>
+      transformTable =
+    {
+      {WorldFrameEnumType::ENU,
+        {
+          {WorldFrameEnumType::ENU, math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NED, math::Quaterniond(
+            GZ_PI, 0, GZ_PI/2)},
+          {WorldFrameEnumType::NWU, math::Quaterniond(
+            0, 0, GZ_PI/2)},
+        }
+      },
+      {WorldFrameEnumType::NED,
+        {
+          {WorldFrameEnumType::ENU, math::Quaterniond(
+            GZ_PI, 0, GZ_PI/2).Inverse()},
+          {WorldFrameEnumType::NED, math::Quaterniond(0, 0, 0)},
+          {WorldFrameEnumType::NWU, math::Quaterniond(
+            -GZ_PI, 0, 0)},
+        }
+      },
+      {WorldFrameEnumType::NWU,
+        {
+          {WorldFrameEnumType::ENU, math::Quaterniond(
+            0, 0, -GZ_PI/2)},
+          {WorldFrameEnumType::NED, math::Quaterniond(GZ_PI, 0, 0)},
+          {WorldFrameEnumType::NWU, math::Quaterniond(0, 0, 0)},
+        }
+      }
+    };
+}
+
+//////////////////////////////////////////////////
+math::Quaterniond UwbSensor::OrientationReference() const
+{
+  return this->dataPtr->orientationReference;
+}
+
+//////////////////////////////////////////////////
+math::Quaterniond UwbSensor::Orientation() const
+{
+  return this->dataPtr->orientation;
 }
 
 //////////////////////////////////////////////////
