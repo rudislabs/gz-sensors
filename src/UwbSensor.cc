@@ -25,6 +25,8 @@
   #pragma warning(pop)
 #endif
 
+#include <math.h>
+
 #include <gz/common/Profiler.hh>
 #include <gz/msgs/Utility.hh>
 #include <gz/transport/Node.hh>
@@ -260,6 +262,13 @@ void UwbSensor::SetWorldFrameOrientation(
       }
     };
 }
+
+/////////////////////////////////////////////////
+void UwbSensor::SetOrientationReference(const math::Quaterniond &_orient)
+{
+  this->dataPtr->orientationReference = _orient;
+}
+
 
 //////////////////////////////////////////////////
 math::Quaterniond UwbSensor::OrientationReference() const

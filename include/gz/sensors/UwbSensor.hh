@@ -99,6 +99,13 @@ namespace gz
       /// \return Pose in world frame.
       public: math::Pose3d WorldPose() const;
 
+      /// \brief Set the orientation reference, i.e. initial imu
+      /// orientation. Imu orientation data generated will be relative to this
+      /// reference frame.
+      /// \param[in] _orientation Reference orientation
+      public: void SetOrientationReference(
+          const math::Quaterniond &_orient);
+          
       /// \brief Get the world orienation reference of the imu
       /// \return Orientation reference in world frame
       public: math::Quaterniond OrientationReference() const;
