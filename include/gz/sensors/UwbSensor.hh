@@ -124,6 +124,18 @@ namespace gz
       public: void SetWorldFrameOrientation(
         const math::Quaterniond &_rot, WorldFrameEnumType _relativeTo);
 
+      /// \brief Set the azimuth and elevation angles
+      /// 
+      /// \param[in] 
+      /// \param[in] 
+      public: void SetAzimuth(const float &_azimuth);
+
+      /// \brief 
+      /// 
+      /// \param[in] 
+      /// \return Azimuth and Elevation relative to another UWB sensor device
+      public: float Azimuth() const;
+      
 /*       /// \brief Get the Azimuth of the controller relative to NED of controllee UWB sensor
       /// \return Azimuth in degrees
       public: float azimuth_dev(const math::Pose3d _pose) const;

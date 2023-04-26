@@ -78,7 +78,7 @@ class gz::sensors::UwbSensorPrivate
          = WorldFrameEnumType::NONE;
 
   /// \brief The azimuth of the UWB sensor in relation to the partner UWB sensor
-  /// public: float azimuth;
+  public: float azimuth;
 };
 
 //////////////////////////////////////////////////
@@ -198,9 +198,11 @@ bool UwbSensor::Update(const std::chrono::steady_clock::duration &_now)
   // TODO: Incorporate orientation
   // working under the assumption that the controllee UWB sensor is always pointing North
   /// azimuth = atan(this->Pose().Pos().X()/ this->Pose().Pos().Y());
-
-  /// msg.set_aoa_azimuth_dev(azimuth);
   
+  //this->dataPtr->azimuth = this->Pose().X();
+
+  msg.set_aoa_azimuth_dev(this->Pose().X());
+
   // publish
   this->AddSequence(msg.mutable_header());
   this->dataPtr->pub.Publish(msg);
@@ -261,6 +263,16 @@ void UwbSensor::SetWorldFrameOrientation(
         }
       }
     };
+
+  if (this->dataPtr->sensorOrientationRelativeTo != WorldFrameEnumType::NONE)
+  {
+    // A valid named localization tag is supplied in the sdf
+    auto tranformation =
+      transformTable.at(this->dataPtr->worldFrameRelativeTo).at
+      (this->dataPtr->sensorOrientationRelativeTo);
+    this->SetOrientationReference(this->dataPtr->worldRelativeOrientation *
+      tranformation);
+  }
 }
 
 /////////////////////////////////////////////////
@@ -286,4 +298,16 @@ math::Quaterniond UwbSensor::Orientation() const
 bool UwbSensor::HasConnections() const
 {
   return this->dataPtr->pub && this->dataPtr->pub.HasConnections();
+}
+
+//////////////////////////////////////////////////
+void UwbSensor::SetAzimuth(const float &_azimuth)
+{
+  this->dataPtr->azimuth = _azimuth;
+}
+
+//////////////////////////////////////////////////
+float UwbSensor::Azimuth() const
+{
+  return this->dataPtr->azimuth;
 }
