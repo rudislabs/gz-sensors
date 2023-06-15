@@ -79,6 +79,12 @@ class gz::sensors::UwbSensorPrivate
 
   /// \brief The azimuth of the UWB sensor in relation to the partner UWB sensor
   public: float azimuth;
+
+  /// \brief Max distance of the UWB sensor ranging
+  ///public: int max_distance = 200;
+
+  /// \brief The azimuth of the UWB sensor in relation to the partner UWB sensor
+  /// public: float angle_min;
 };
 
 //////////////////////////////////////////////////
@@ -182,10 +188,6 @@ bool UwbSensor::Update(const std::chrono::steady_clock::duration &_now)
   frame->set_key("frame_id");
   frame->add_value(this->FrameId());
 
-  // Set the time stamp
-/*   *this->dataPtr->pointMsg.mutable_header()->mutable_stamp() =
-    msgs::Convert(_now); */
-
     // Set the UWB orientation
     // uwb orientation with respect to reference frame
   this->dataPtr->orientation =
@@ -197,11 +199,13 @@ bool UwbSensor::Update(const std::chrono::steady_clock::duration &_now)
   // Calculate azimuth angle of device in relation to partner device
   // TODO: Incorporate orientation
   // working under the assumption that the controllee UWB sensor is always pointing North
-  /// azimuth = atan(this->Pose().Pos().X()/ this->Pose().Pos().Y());
+  /// azimuth = atan((this->Pose().Pos().X())-(x2)/ this->Pose().Pos().Y());
   
   //this->dataPtr->azimuth = this->Pose().X();
-
-  msg.set_aoa_azimuth_dev(this->Pose().X());
+  //if(sensor.name())
+  ///float azimuth = this->Pose().Pos().Y();
+  
+  /// msg.set_aoa_azimuth_dev(azimuth);
 
   // publish
   this->AddSequence(msg.mutable_header());
